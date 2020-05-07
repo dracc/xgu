@@ -181,6 +181,11 @@ typedef enum {
 } XguPaletteLen;
 
 typedef enum {
+    XGU_TEXTURE_CONVOLUTION_QUINCUNX = NV097_SET_TEXTURE_FILTER_CONVOLUTION_KERNEL_QUINCUNX,
+    XGU_TEXTURE_CONVOLUTION_GAUSSIAN = NV097_SET_TEXTURE_FILTER_CONVOLUTION_KERNEL_GAUSSIAN_3,
+} XguTexConvolution;
+
+typedef enum {
     XGU_STENCIL_OP_KEEP = NV097_SET_STENCIL_OP_V_KEEP,
     XGU_STENCIL_OP_ZERO = NV097_SET_STENCIL_OP_V_ZERO,
     XGU_STENCIL_OP_REPLACE = NV097_SET_STENCIL_OP_V_REPLACE,
@@ -848,11 +853,12 @@ uint32_t* xgu_set_texture_control1(uint32_t* p, unsigned int texture_index, uint
 }
 
 inline
-uint32_t* xgu_set_texture_filter(uint32_t* p, unsigned int texture_index, uint16_t lod_bias, uint8_t filter_min, uint8_t filter_mag,
+uint32_t* xgu_set_texture_filter(uint32_t* p, unsigned int texture_index, uint16_t lod_bias, XguTexConvolution convolution_kernel, uint8_t filter_min, uint8_t filter_mag,
                                  bool r_signed, bool g_signed, bool b_signed, bool a_signed) {
     assert(texture_index < XGU_TEXTURE_COUNT);
     return push_command_parameter(p, NV097_SET_TEXTURE_FILTER + texture_index*64,
                                   XGU_MASK(NV097_SET_TEXTURE_FILTER_MIPMAP_LOD_BIAS, lod_bias) |
+                                  XGU_MASK(NV097_SET_TEXTURE_FILTER_CONVOLUTION_KERNEL, convolution_kernel) |
                                   XGU_MASK(NV097_SET_TEXTURE_FILTER_MIN, filter_min) |
                                   XGU_MASK(NV097_SET_TEXTURE_FILTER_MAG, filter_mag) |
                                   XGU_MASK(NV097_SET_TEXTURE_FILTER_ASIGNED, a_signed) |
