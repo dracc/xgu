@@ -69,6 +69,17 @@ typedef enum {
     XGU_RANGE_MODE_PRIVATE = 1 /*NV097_SET_TRANSFORM_EXECUTION_MODE_RANGE_MODE_PRIVATE */
 } XguExecRange;
 
+//FIXME: These names are bad
+typedef enum {
+    XGU_SKIN_MODE_OFF = NV097_SET_SKIN_MODE_OFF,
+    XGU_SKIN_MODE_2G = NV097_SET_SKIN_MODE_2G,
+    XGU_SKIN_MODE_2 = NV097_SET_SKIN_MODE_2,
+    XGU_SKIN_MODE_3G = NV097_SET_SKIN_MODE_3G,
+    XGU_SKIN_MODE_3 = NV097_SET_SKIN_MODE_3,
+    XGU_SKIN_MODE_4G = NV097_SET_SKIN_MODE_4G,
+    XGU_SKIN_MODE_4 = NV097_SET_SKIN_MODE_4,
+} XguSkinMode;
+
 typedef enum {
     XGU_CLEAR_Z = NV097_CLEAR_SURFACE_Z,
     XGU_CLEAR_STENCIL = NV097_CLEAR_SURFACE_STENCIL,
@@ -426,32 +437,32 @@ uint32_t* xgu_set_object(uint32_t* p, uint32_t instance) {
 
 inline
 uint32_t* xgu_set_texgen_s(uint32_t* p, unsigned int texture_index, XguTexgen tg) {
-    assert(texture_index == 0); //FIXME: Support up to 4
-    return push_command_parameter(p, NV097_SET_TEXGEN_S, tg);
+    assert(texture_index < XGU_TEXTURE_COUNT);
+    return push_command_parameter(p, NV097_SET_TEXGEN_S + texture_index * 16, tg);
 }
 
 inline
 uint32_t* xgu_set_texgen_t(uint32_t* p, unsigned int texture_index, XguTexgen tg) {
-    assert(texture_index == 0); //FIXME: Support up to 4
-    return push_command_parameter(p, NV097_SET_TEXGEN_T, tg);
+    assert(texture_index < XGU_TEXTURE_COUNT);
+    return push_command_parameter(p, NV097_SET_TEXGEN_T + texture_index * 16, tg);
 }
 
 inline
 uint32_t* xgu_set_texgen_r(uint32_t* p, unsigned int texture_index, XguTexgen tg) {
-    assert(texture_index == 0); //FIXME: Support up to 4
-    return push_command_parameter(p, NV097_SET_TEXGEN_R, tg);
+    assert(texture_index < XGU_TEXTURE_COUNT);
+    return push_command_parameter(p, NV097_SET_TEXGEN_R + texture_index * 16, tg);
 }
 
 inline
 uint32_t* xgu_set_texgen_q(uint32_t* p, unsigned int texture_index, XguTexgen tg) {
-    assert(texture_index == 0); //FIXME: Support up to 4
-    return push_command_parameter(p, NV097_SET_TEXGEN_Q, tg);
+    assert(texture_index < XGU_TEXTURE_COUNT);
+    return push_command_parameter(p, NV097_SET_TEXGEN_Q + texture_index * 16, tg);
 }
 
 inline
 uint32_t* xgu_set_texture_matrix_enable(uint32_t* p, unsigned int texture_index, bool enabled) {
-    assert(texture_index == 0); //FIXME: Support up to 4
-    return push_command_boolean(p, NV097_SET_TEXTURE_MATRIX_ENABLE, enabled);
+    assert(texture_index < XGU_TEXTURE_COUNT);
+    return push_command_boolean(p, NV097_SET_TEXTURE_MATRIX_ENABLE + texture_index * 4, enabled);
 }
 
 inline
@@ -460,13 +471,20 @@ uint32_t* xgu_set_projection_matrix(uint32_t* p, const float m[4*4]) {
 }
 
 inline
-uint32_t* xgu_set_model_view_matrix(uint32_t* p, uint32_t bone_index, const float m[4*4]) {
-    return push_command_matrix4x4(p, NV097_SET_MODEL_VIEW_MATRIX + bone_index*(4*4)*4, m);
+uint32_t* xgu_set_skin_mode(uint32_t* p, XguSkinMode skin_mode) {
+    return push_command_parameter(p, NV097_SET_SKIN_MODE, skin_mode);
 }
 
 inline
-uint32_t* xgu_set_inverse_model_view_matrix(uint32_t* p, uint32_t bone_index, const float m[4*4]) {
-    return push_command_matrix4x4(p, NV097_SET_INVERSE_MODEL_VIEW_MATRIX + bone_index*(4*4)*4, m);
+uint32_t* xgu_set_model_view_matrix(uint32_t* p, uint32_t weight_index, const float m[4*4]) {
+    assert(weight_index < XGU_WEIGHT_COUNT);
+    return push_command_matrix4x4(p, NV097_SET_MODEL_VIEW_MATRIX + weight_index*(4*4)*4, m);
+}
+
+inline
+uint32_t* xgu_set_inverse_model_view_matrix(uint32_t* p, uint32_t weight_index, const float m[4*4]) {
+    assert(weight_index < XGU_WEIGHT_COUNT);
+    return push_command_matrix4x4(p, NV097_SET_INVERSE_MODEL_VIEW_MATRIX + weight_index*(4*4)*4, m);
 }
 
 inline
@@ -476,8 +494,8 @@ uint32_t* xgu_set_composite_matrix(uint32_t* p, const float m[4*4]) {
 
 inline
 uint32_t* xgu_set_texture_matrix(uint32_t* p, unsigned int texture_index, const float m[4*4]) {
-    assert(texture_index == 0); //FIXME: Support up to 4
-    return push_command_matrix4x4(p, NV097_SET_TEXTURE_MATRIX, m);
+    assert(texture_index < XGU_TEXTURE_COUNT);
+    return push_command_matrix4x4(p, NV097_SET_TEXTURE_MATRIX + texture_index*(4*4)*4, m);
 }
 
 /* ==== Stencil OP ==== */

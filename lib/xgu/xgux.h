@@ -138,7 +138,7 @@ GENERIC_ATTRIBUTE(fogcoord, XGU_POINT_SIZE_ARRAY,, x, y, z, w)
 GENERIC_ATTRIBUTE(point_size, XGU_POINT_SIZE_ARRAY,, x, y, z, w)
 GENERIC_ATTRIBUTE(back_diffuse, XGU_COLOR_ARRAY,, r, g, b, a)
 GENERIC_ATTRIBUTE(back_specular, XGU_COLOR_ARRAY,, r, g, b, a)
-GENERIC_ATTRIBUTE(texcoord, 8+index, unsigned int index, s, t, r, q)
+GENERIC_ATTRIBUTE(texcoord, 9+index, unsigned int index, s, t, r, q)
 GENERIC_ATTRIBUTE(vertex_attribute, index, unsigned int index, x, y, z, w)
 
 #undef GENERIC_ATTRIBUTE
@@ -163,7 +163,7 @@ uint32_t* xgux_set_color4ub(uint32_t* p, uint8_t r, uint8_t g, uint8_t b, uint8_
 
 inline
 uint32_t* xgux_set_texcoord3f(uint32_t* p, unsigned int index, float s, float t, float r) {
-    return xgu_set_vertex_data4f(p, 8+index, s, t, r, 1.0f);
+    return xgu_set_vertex_data4f(p, 9+index, s, t, r, 1.0f);
 }
 
 #endif
