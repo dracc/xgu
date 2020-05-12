@@ -13,6 +13,8 @@
 #include <stdbool.h>
 #include <string.h>
 
+#define XGU_API
+
 typedef enum {
     //FIXME: define NV097_SET_VERTEX_DATA_ARRAY_FORMAT_TYPE_UB_D3D     0
     //FIXME: define NV097_SET_VERTEX_DATA_ARRAY_FORMAT_TYPE_S1         1
@@ -89,6 +91,16 @@ typedef enum {
     XGU_CLEAR_B = NV097_CLEAR_SURFACE_B,
     XGU_CLEAR_A = NV097_CLEAR_SURFACE_A
 } XguClearSurface;
+
+
+//FIXME: Combine these flags with the `wrap_{u,v,p,q}` flag?
+typedef enum {
+  XGU_WRAP = NV_PGRAPH_TEXADDRESS0_ADDRU_WRAP,
+  XGU_MIRROR = NV_PGRAPH_TEXADDRESS0_ADDRU_MIRROR,
+  XGU_CLAMP_TO_EDGE = NV_PGRAPH_TEXADDRESS0_ADDRU_CLAMP_TO_EDGE,
+  XGU_CLAMP_TO_BORDER = NV_PGRAPH_TEXADDRESS0_ADDRU_BORDER,
+  XGU_CLAMP = NV_PGRAPH_TEXADDRESS0_ADDRU_CLAMP_OGL,
+} XguTextureAddress;
 
 /*
  * SFACTOR and DFACTOR share the same values for their respective defines.
@@ -219,6 +231,8 @@ typedef enum {
     XGU_LMASK_SPOT = NV097_SET_LIGHT_ENABLE_MASK_LIGHT0_SPOT
 } XguLightMask;
 
+typedef uint32_t XguStencilValue; //FIXME: Only 8 bit will be relevant probably?
+
 #define XGU_MASK(mask, val) (((val) << (__builtin_ffs(mask)-1)) & (mask))
 
 #define XGU_ATTRIBUTE_COUNT 16
@@ -343,7 +357,7 @@ uint32_t* push_command_float(uint32_t* p, uint32_t command, float parameter) {
  * BEGIN XGU FUNCTIONS BLOCK *
  * ========================= */
 
-inline
+XGU_API
 uint32_t* xgu_begin(uint32_t* p, XguPrimitiveType type) {
 
     // Force people to use xgu_end instead
@@ -352,23 +366,23 @@ uint32_t* xgu_begin(uint32_t* p, XguPrimitiveType type) {
     return push_command_parameter(p, NV097_SET_BEGIN_END, type);
 }
 
-inline
+XGU_API
 uint32_t* xgu_end(uint32_t* p) {
     return push_command_parameter(p, NV097_SET_BEGIN_END, NV097_SET_BEGIN_END_OP_END);
 }
 
-inline
+XGU_API
 uint32_t* xgu_no_operation(uint32_t* p, uint32_t param) {
     /* param is typically 0 */
     return push_command_parameter(p, NV097_NO_OPERATION, param);
 }
 
-inline
+XGU_API
 uint32_t* xgu_wait_for_idle(uint32_t* p) {
     return push_command(p, NV097_WAIT_FOR_IDLE, 0);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_viewport_offset(uint32_t* p, float x, float y, float z, float w) {
     p = push_command(p, NV097_SET_VIEWPORT_OFFSET, 4);
     p = push_float(p, x);
@@ -378,7 +392,7 @@ uint32_t* xgu_set_viewport_offset(uint32_t* p, float x, float y, float z, float 
     return p;
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_viewport_scale(uint32_t* p, float x, float y, float z, float w) {
     p = push_command(p, NV097_SET_VIEWPORT_SCALE, 4);
     p = push_float(p, x);
@@ -388,27 +402,27 @@ uint32_t* xgu_set_viewport_scale(uint32_t* p, float x, float y, float z, float w
     return p;
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_clip_min(uint32_t* p, float znear) {
     return push_command_float(p, NV097_SET_CLIP_MIN, znear);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_clip_max(uint32_t* p, float zfar) {
     return push_command_float(p, NV097_SET_CLIP_MAX, zfar);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_zstencil_clear_value(uint32_t* p, uint32_t value) {
     return push_command_parameter(p, NV097_SET_ZSTENCIL_CLEAR_VALUE, value);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_color_clear_value(uint32_t* p, uint32_t color) {
     return push_command_parameter(p, NV097_SET_COLOR_CLEAR_VALUE, color);
 }
 
-inline
+XGU_API
 uint32_t* xgu_clear_surface(uint32_t* p, XguClearSurface flags) {
     /*
      * flags should probably be a combination of values -
@@ -418,106 +432,128 @@ uint32_t* xgu_clear_surface(uint32_t* p, XguClearSurface flags) {
     return push_command_parameter(p, NV097_CLEAR_SURFACE, flags);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_clear_rect_horizontal(uint32_t* p, uint32_t x1, uint32_t x2) {
     return push_command_parameter(p, NV097_SET_CLEAR_RECT_HORIZONTAL,
                                   ((x2-1)<<16)|x1);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_clear_rect_vertical(uint32_t* p, uint32_t y1, uint32_t y2) {
     return push_command_parameter(p, NV097_SET_CLEAR_RECT_VERTICAL,
                                   ((y2-1)<<16)|y1);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_object(uint32_t* p, uint32_t instance) {
     return push_command_parameter(p, NV097_SET_OBJECT, instance);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_texgen_s(uint32_t* p, unsigned int texture_index, XguTexgen tg) {
     assert(texture_index < XGU_TEXTURE_COUNT);
     return push_command_parameter(p, NV097_SET_TEXGEN_S + texture_index * 16, tg);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_texgen_t(uint32_t* p, unsigned int texture_index, XguTexgen tg) {
     assert(texture_index < XGU_TEXTURE_COUNT);
     return push_command_parameter(p, NV097_SET_TEXGEN_T + texture_index * 16, tg);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_texgen_r(uint32_t* p, unsigned int texture_index, XguTexgen tg) {
     assert(texture_index < XGU_TEXTURE_COUNT);
     return push_command_parameter(p, NV097_SET_TEXGEN_R + texture_index * 16, tg);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_texgen_q(uint32_t* p, unsigned int texture_index, XguTexgen tg) {
     assert(texture_index < XGU_TEXTURE_COUNT);
     return push_command_parameter(p, NV097_SET_TEXGEN_Q + texture_index * 16, tg);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_texture_matrix_enable(uint32_t* p, unsigned int texture_index, bool enabled) {
     assert(texture_index < XGU_TEXTURE_COUNT);
     return push_command_boolean(p, NV097_SET_TEXTURE_MATRIX_ENABLE + texture_index * 4, enabled);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_projection_matrix(uint32_t* p, const float m[4*4]) {
     return push_command_matrix4x4(p, NV097_SET_PROJECTION_MATRIX, m);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_skin_mode(uint32_t* p, XguSkinMode skin_mode) {
     return push_command_parameter(p, NV097_SET_SKIN_MODE, skin_mode);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_model_view_matrix(uint32_t* p, uint32_t weight_index, const float m[4*4]) {
     assert(weight_index < XGU_WEIGHT_COUNT);
     return push_command_matrix4x4(p, NV097_SET_MODEL_VIEW_MATRIX + weight_index*(4*4)*4, m);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_inverse_model_view_matrix(uint32_t* p, uint32_t weight_index, const float m[4*4]) {
     assert(weight_index < XGU_WEIGHT_COUNT);
     return push_command_matrix4x4(p, NV097_SET_INVERSE_MODEL_VIEW_MATRIX + weight_index*(4*4)*4, m);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_composite_matrix(uint32_t* p, const float m[4*4]) {
     return push_command_matrix4x4(p, NV097_SET_COMPOSITE_MATRIX, m);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_texture_matrix(uint32_t* p, unsigned int texture_index, const float m[4*4]) {
     assert(texture_index < XGU_TEXTURE_COUNT);
     return push_command_matrix4x4(p, NV097_SET_TEXTURE_MATRIX + texture_index*(4*4)*4, m);
 }
 
-/* ==== Stencil OP ==== */
+/* ==== Stencil ==== */
 
-inline
+XGU_API
 uint32_t* xgu_set_stencil_op_fail(uint32_t* p, XguStencilOp so) {
     return push_command_parameter(p, NV097_SET_STENCIL_OP_FAIL, so);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_stencil_op_zfail(uint32_t* p, XguStencilOp so) {
     return push_command_parameter(p, NV097_SET_STENCIL_OP_ZFAIL, so);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_stencil_op_zpass(uint32_t* p, XguStencilOp so) {
     return push_command_parameter(p, NV097_SET_STENCIL_OP_ZPASS, so);
 }
 
+XGU_API
+uint32_t* xgu_set_stencil_mask(uint32_t* p, XguStencilValue mask) {
+    return push_command_parameter(p, NV097_SET_STENCIL_MASK, mask);
+}
+
+XGU_API
+uint32_t* xgu_set_stencil_func(uint32_t* p, XguFuncType func) {
+    return push_command_parameter(p, NV097_SET_STENCIL_FUNC, func);
+}
+
+XGU_API
+uint32_t* xgu_set_stencil_func_ref(uint32_t* p, XguStencilValue ref) {
+    //FIXME: Only 8 bit will be relevant probably?
+    return push_command_parameter(p, NV097_SET_STENCIL_FUNC_REF, ref);
+}
+
+XGU_API
+uint32_t* xgu_set_stencil_func_mask(uint32_t* p, XguStencilValue mask) {
+    //FIXME: Only 8 bit will be relevant probably?
+    return push_command_parameter(p, NV097_SET_STENCIL_FUNC_MASK, mask);
+}
+
 /* ==== Vertex Data Array ==== */
 
-inline
+XGU_API
 uint32_t* xgu_set_vertex_data_array_format(uint32_t* p, XguVertexArray index, XguVertexArrayType format,
                                         uint32_t size, uint32_t stride) {
     return push_command_parameter(p, NV097_SET_VERTEX_DATA_ARRAY_FORMAT + index*4,
@@ -526,13 +562,13 @@ uint32_t* xgu_set_vertex_data_array_format(uint32_t* p, XguVertexArray index, Xg
                                   XGU_MASK(NV097_SET_VERTEX_DATA_ARRAY_FORMAT_STRIDE, stride));
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_vertex_data_array_offset(uint32_t* p, XguVertexArray index, const void* data) {
     return push_command_parameter(p, NV097_SET_VERTEX_DATA_ARRAY_OFFSET + index*4,
                                   (uint32_t)data/* & 0x03fffff*/);
 }
 
-inline
+XGU_API
 uint32_t* xgu_element16(uint32_t* p, const uint16_t* elements, unsigned int count) {
     assert(count % 2 == 0);
     p = push_command(p, 0x40000000|NV097_ARRAY_ELEMENT16, count/2);
@@ -541,7 +577,7 @@ uint32_t* xgu_element16(uint32_t* p, const uint16_t* elements, unsigned int coun
     return p;
 }
 
-inline
+XGU_API
 uint32_t* xgu_element32(uint32_t* p, const uint32_t* elements, unsigned int count) {
     p = push_command(p, 0x40000000|NV097_ARRAY_ELEMENT32, count);
     memcpy(p, elements, count * sizeof(uint32_t));
@@ -549,7 +585,7 @@ uint32_t* xgu_element32(uint32_t* p, const uint32_t* elements, unsigned int coun
     return p;
 }
 
-inline
+XGU_API
 uint32_t* xgu_draw_arrays(uint32_t* p, unsigned int start, unsigned int count) {
     assert(count>=1);
     assert(count<=256);
@@ -559,88 +595,93 @@ uint32_t* xgu_draw_arrays(uint32_t* p, unsigned int start, unsigned int count) {
 }
 
 /* ==== Alpha/Blend/Cull ==== */
-inline
+XGU_API
 uint32_t* xgu_set_alpha_test_enable(uint32_t* p, bool enabled) {
     return push_command_boolean(p, NV097_SET_ALPHA_TEST_ENABLE, enabled);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_blend_enable(uint32_t* p, bool enabled) {
     return push_command_boolean(p, NV097_SET_BLEND_ENABLE, enabled);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_cull_face_enable(uint32_t* p, bool enabled) {
     return push_command_boolean(p, NV097_SET_CULL_FACE_ENABLE, enabled);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_depth_test_enable(uint32_t* p, bool enabled) {
     return push_command_boolean(p, NV097_SET_DEPTH_TEST_ENABLE, enabled);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_dither_enable(uint32_t* p, bool enabled) {
     return push_command_boolean(p, NV097_SET_DITHER_ENABLE, enabled);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_lighting_enable(uint32_t* p, bool enabled) {
     return push_command_boolean(p, NV097_SET_LIGHTING_ENABLE, enabled);
 }
 
-inline
+XGU_API
+uint32_t* xgu_set_normalization_enable(uint32_t* p, bool enabled) {
+    return push_command_boolean(p, NV097_SET_NORMALIZATION_ENABLE, enabled);
+}
+
+XGU_API
 uint32_t* xgu_set_stencil_test_enable(uint32_t* p, bool enabled) {
     return push_command_boolean(p, NV097_SET_STENCIL_TEST_ENABLE, enabled);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_alpha_func(uint32_t* p, XguFuncType func) {
     return push_command_parameter(p, NV097_SET_ALPHA_FUNC, func);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_alpha_ref(uint32_t* p, uint8_t ref) {
     return push_command_parameter(p, NV097_SET_ALPHA_REF, ref);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_blend_func_sfactor(uint32_t* p, XguBlendFactor sf) {
     return push_command_parameter(p, NV097_SET_BLEND_FUNC_SFACTOR, sf);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_blend_func_dfactor(uint32_t* p, XguBlendFactor df) {
     return push_command_parameter(p, NV097_SET_BLEND_FUNC_DFACTOR, df);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_depth_func(uint32_t* p, XguFuncType func) {
     return push_command_parameter(p, NV097_SET_DEPTH_FUNC, func);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_color_mask(uint32_t* p, XguColorMask cm) {
     return push_command_parameter(p, NV097_SET_COLOR_MASK, cm);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_front_polygon_mode(uint32_t* p, XguPolygonMode pm) {
     return push_command_parameter(p, NV097_SET_FRONT_POLYGON_MODE, pm);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_cull_face(uint32_t* p, XguCullFace cf) {
     return push_command_parameter(p, NV097_SET_CULL_FACE, cf);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_front_face(uint32_t* p, XguFrontFace ff) {
     return push_command_parameter(p, NV097_SET_FRONT_FACE, ff);
 }
 
 /* ==== Transform ==== */
-inline
+XGU_API
 uint32_t* xgu_set_transform_execution_mode(uint32_t* p, XguExecMode mode, XguExecRange range) {
     return push_command_parameter(p,
                                   NV097_SET_TRANSFORM_EXECUTION_MODE,
@@ -648,7 +689,7 @@ uint32_t* xgu_set_transform_execution_mode(uint32_t* p, XguExecMode mode, XguExe
                                   XGU_MASK(NV097_SET_TRANSFORM_EXECUTION_MODE_RANGE_MODE, range));
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_transform_constant(uint32_t* p, const XguVec4 *v, unsigned int count) {
     p = push_command(p, NV097_SET_TRANSFORM_CONSTANT, count*4);
     for (uint32_t i = 0; i < count; ++i) {
@@ -657,7 +698,7 @@ uint32_t* xgu_set_transform_constant(uint32_t* p, const XguVec4 *v, unsigned int
     return p;
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_transform_constant_load(uint32_t* p, uint32_t offset) {
     return push_command_parameter(p, NV097_SET_TRANSFORM_CONSTANT_LOAD, offset);
 }
@@ -673,7 +714,7 @@ typedef union {
     };
 } XguTransformProgramInstruction;
 
-inline
+XGU_API
 uint32_t* xgu_set_transform_program(uint32_t* p, const XguTransformProgramInstruction* instructions, unsigned int count) {
     p = push_command(p, NV097_SET_TRANSFORM_PROGRAM, count*4);
     for (uint32_t i = 0; i < count; ++i) {
@@ -682,23 +723,61 @@ uint32_t* xgu_set_transform_program(uint32_t* p, const XguTransformProgramInstru
     return p;
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_transform_program_start(uint32_t* p, uint32_t offset) {
     return push_command_parameter(p, NV097_SET_TRANSFORM_PROGRAM_START, offset);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_transform_program_load(uint32_t* p, uint32_t offset) {
     return push_command_parameter(p, NV097_SET_TRANSFORM_PROGRAM_LOAD, offset);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_transform_program_cxt_write_enable(uint32_t* p, bool enabled) {
     return push_command_boolean(p, NV097_SET_TRANSFORM_PROGRAM_CXT_WRITE_EN, enabled);
 }
 
 /* ==== Lights ==== */
-inline
+
+//FIXME: Move to nv2a_regs.h
+#define NV097_SET_SPECULAR_PARAMS      0x09E0
+#define NV097_SET_BACK_SPECULAR_PARAMS 0x1E28
+
+XGU_API
+uint32_t* xgu_set_specular(uint32_t* p, float a, float b, float c, float d, float e, float f) {
+  p = push_command(p, NV097_SET_SPECULAR_PARAMS, 6);
+  p = push_float(p, a);
+  p = push_float(p, b);
+  p = push_float(p, c);
+  p = push_float(p, d);
+  p = push_float(p, e);
+  p = push_float(p, f);
+  return p;
+}
+
+XGU_API
+uint32_t* xgu_set_back_specular(uint32_t* p, float a, float b, float c, float d, float e, float f) {
+  p = push_command(p, NV097_SET_BACK_SPECULAR_PARAMS, 6);
+  p = push_float(p, a);
+  p = push_float(p, b);
+  p = push_float(p, c);
+  p = push_float(p, d);
+  p = push_float(p, e);
+  p = push_float(p, f);
+  return p;
+}
+
+XGU_API
+uint32_t* xgu_set_scene_ambient_color(uint32_t* p, float r, float g, float b) {
+    p = push_command(p, NV097_SET_SCENE_AMBIENT_COLOR, 3);
+    p = push_float(p, r);
+    p = push_float(p, g);
+    p = push_float(p, b);
+    return p;
+}
+
+XGU_API
 uint32_t* xgu_set_light_enable_mask(uint32_t* p, XguLightMask light0, XguLightMask light1, XguLightMask light2, XguLightMask light3, XguLightMask light4, XguLightMask light5,XguLightMask light6, XguLightMask light7) {
     return push_command_parameter(p, NV097_SET_LIGHT_ENABLE_MASK, 0
                                   | (light0 << 0)
@@ -711,7 +790,7 @@ uint32_t* xgu_set_light_enable_mask(uint32_t* p, XguLightMask light0, XguLightMa
                                   | (light7 << 14));
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_back_light_ambient_color(uint32_t* p, unsigned int light_index, float r, float g, float b) {
     assert(light_index < XGU_LIGHT_COUNT);
     p = push_command(p, NV097_SET_BACK_LIGHT_AMBIENT_COLOR + light_index*64, 3);
@@ -721,7 +800,7 @@ uint32_t* xgu_set_back_light_ambient_color(uint32_t* p, unsigned int light_index
     return p;
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_back_light_diffuse_color(uint32_t* p, unsigned int light_index, float r, float g, float b) {
     assert(light_index < XGU_LIGHT_COUNT);
     p = push_command(p, NV097_SET_BACK_LIGHT_DIFFUSE_COLOR + light_index*64, 3);
@@ -731,7 +810,7 @@ uint32_t* xgu_set_back_light_diffuse_color(uint32_t* p, unsigned int light_index
     return p;
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_back_light_specular_color(uint32_t* p, unsigned int light_index, float r, float g, float b) {
     assert(light_index < XGU_LIGHT_COUNT);
     p = push_command(p, NV097_SET_BACK_LIGHT_SPECULAR_COLOR + light_index*64, 3);
@@ -741,7 +820,7 @@ uint32_t* xgu_set_back_light_specular_color(uint32_t* p, unsigned int light_inde
     return p;
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_light_ambient_color(uint32_t* p, unsigned int light_index, float r, float g, float b) {
     assert(light_index < XGU_LIGHT_COUNT);
     p = push_command(p, NV097_SET_LIGHT_AMBIENT_COLOR + light_index*128, 3);
@@ -751,7 +830,7 @@ uint32_t* xgu_set_light_ambient_color(uint32_t* p, unsigned int light_index, flo
     return p;
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_light_diffuse_color(uint32_t* p, unsigned int light_index, float r, float g, float b) {
     assert(light_index < XGU_LIGHT_COUNT);
     p = push_command(p, NV097_SET_LIGHT_DIFFUSE_COLOR + light_index*128, 3);
@@ -761,7 +840,7 @@ uint32_t* xgu_set_light_diffuse_color(uint32_t* p, unsigned int light_index, flo
     return p;
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_light_specular_color(uint32_t* p, unsigned int light_index, float r, float g, float b) {
     assert(light_index < XGU_LIGHT_COUNT);
     p = push_command(p, NV097_SET_LIGHT_SPECULAR_COLOR + light_index*128, 3);
@@ -771,48 +850,48 @@ uint32_t* xgu_set_light_specular_color(uint32_t* p, unsigned int light_index, fl
     return p;
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_light_local_range(uint32_t* p, unsigned int light_index, float range) {
     assert(light_index < XGU_LIGHT_COUNT);
     return push_command_float(p, NV097_SET_LIGHT_LOCAL_RANGE + light_index*128, range);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_light_infinite_half_vector(uint32_t* p, unsigned int light_index, XguVec3 v) {
     assert(light_index < XGU_LIGHT_COUNT);
     p = push_command(p, NV097_SET_LIGHT_INFINITE_HALF_VECTOR + light_index*128, 3);
     return push_floats(p, v.f, 3);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_light_infinite_direction(uint32_t* p, unsigned int light_index, XguVec3 v) {
     assert(light_index < XGU_LIGHT_COUNT);
     p = push_command(p, NV097_SET_LIGHT_INFINITE_DIRECTION + light_index*128, 3);
     return push_floats(p, v.f, 3);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_light_spot_falloff(uint32_t* p, unsigned int light_index, XguVec3 v) {
     assert(light_index < XGU_LIGHT_COUNT);
     p = push_command(p, NV097_SET_LIGHT_SPOT_FALLOFF + light_index*128, 3);
     return push_floats(p, v.f, 3);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_light_spot_direction(uint32_t* p, unsigned int light_index, XguVec4 v) {
     assert(light_index < XGU_LIGHT_COUNT);
     p = push_command(p, NV097_SET_LIGHT_SPOT_DIRECTION + light_index*128, 4);
     return push_floats(p, v.f, 4);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_light_local_position(uint32_t* p, unsigned int light_index, XguVec3 v) {
     assert(light_index < XGU_LIGHT_COUNT);
     p = push_command(p, NV097_SET_LIGHT_LOCAL_POSITION + light_index*128, 3);
     return push_floats(p, v.f, 3);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_light_local_attenuation(uint32_t* p, unsigned int light_index, float constant_factor, float linear_factor, float quadratic_factor) {
     assert(light_index < XGU_LIGHT_COUNT);
     p = push_command(p, NV097_SET_LIGHT_LOCAL_ATTENUATION + light_index*128, 3);
@@ -824,13 +903,13 @@ uint32_t* xgu_set_light_local_attenuation(uint32_t* p, unsigned int light_index,
 
 /* ==== Texture stuff ==== */
 
-inline
+XGU_API
 uint32_t* xgu_set_texture_offset(uint32_t* p, unsigned int texture_index, const void* offset) {
     assert(texture_index < XGU_TEXTURE_COUNT);
     return push_command_parameter(p, NV097_SET_TEXTURE_OFFSET + texture_index*64, (uint32_t)offset);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_texture_format(uint32_t* p, unsigned int texture_index, uint8_t context_dma, bool cubemap_enable,
                                  XguBorderSrc border_src, uint8_t dimensionality,
                                  XguTexFormatColor format, uint8_t mipmap_levels,
@@ -848,13 +927,21 @@ uint32_t* xgu_set_texture_format(uint32_t* p, unsigned int texture_index, uint8_
                                   XGU_MASK(NV097_SET_TEXTURE_FORMAT_BASE_SIZE_P, p_size));
 }
 
-inline
-uint32_t* xgu_set_texture_address(uint32_t* p, unsigned int texture_index, uint32_t address) {
+XGU_API
+uint32_t* xgu_set_texture_address(uint32_t* p, unsigned int texture_index, XguTextureAddress address_u, bool wrap_u, XguTextureAddress address_v, bool wrap_v, XguTextureAddress address_p, bool wrap_p, bool wrap_q) {
     assert(texture_index < XGU_TEXTURE_COUNT);
-    return push_command_parameter(p, NV097_SET_TEXTURE_ADDRESS + texture_index*64, address);
+    uint32_t value = 0;
+    value |= address_u << 0;
+    value |= (wrap_u ? 1 : 0) << 4;
+    value |= address_v << 8;
+    value |= (wrap_v ? 1 : 0) << 12;
+    value |= address_p << 16;
+    value |= (wrap_p ? 1 : 0) << 20;
+    value |= (wrap_q ? 1 : 0) << 24;
+    return push_command_parameter(p, NV097_SET_TEXTURE_ADDRESS + texture_index*64, value);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_texture_control0(uint32_t* p, unsigned int texture_index, bool enable, uint16_t min_lod, uint16_t max_lod) {
     assert(texture_index < XGU_TEXTURE_COUNT);
     return push_command_parameter(p, NV097_SET_TEXTURE_CONTROL0 + texture_index*64,
@@ -863,14 +950,14 @@ uint32_t* xgu_set_texture_control0(uint32_t* p, unsigned int texture_index, bool
                                   XGU_MASK(NV097_SET_TEXTURE_CONTROL0_MAX_LOD_CLAMP, max_lod));
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_texture_control1(uint32_t* p, unsigned int texture_index, uint16_t pitch) {
     assert(texture_index < XGU_TEXTURE_COUNT);
     return push_command_parameter(p, NV097_SET_TEXTURE_CONTROL1 + texture_index*64,
                                   XGU_MASK(NV097_SET_TEXTURE_CONTROL1_IMAGE_PITCH, pitch));
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_texture_filter(uint32_t* p, unsigned int texture_index, uint16_t lod_bias, XguTexConvolution convolution_kernel, uint8_t filter_min, uint8_t filter_mag,
                                  bool r_signed, bool g_signed, bool b_signed, bool a_signed) {
     assert(texture_index < XGU_TEXTURE_COUNT);
@@ -885,7 +972,7 @@ uint32_t* xgu_set_texture_filter(uint32_t* p, unsigned int texture_index, uint16
                                   XGU_MASK(NV097_SET_TEXTURE_FILTER_BSIGNED, b_signed));
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_texture_image_rect(uint32_t* p, unsigned int texture_index, uint16_t width, uint16_t height) {
     assert(texture_index < XGU_TEXTURE_COUNT);
     return push_command_parameter(p, NV097_SET_TEXTURE_IMAGE_RECT + texture_index*64,
@@ -893,7 +980,7 @@ uint32_t* xgu_set_texture_image_rect(uint32_t* p, unsigned int texture_index, ui
                                   XGU_MASK(NV097_SET_TEXTURE_IMAGE_RECT_HEIGHT, height));
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_texture_palette(uint32_t* p, unsigned int texture_index, bool context_dma, XguPaletteLen palette_length,
                                   const void* offset) {
     assert(texture_index < XGU_TEXTURE_COUNT);
@@ -903,25 +990,25 @@ uint32_t* xgu_set_texture_palette(uint32_t* p, unsigned int texture_index, bool 
                                   XGU_MASK(NV097_SET_TEXTURE_PALETTE_OFFSET, (uint32_t)offset)); //FIXME: Probably bad offset? I don't think this has to be shifted?
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_texture_border_color(uint32_t* p, unsigned int texture_index, uint32_t color) {
     assert(texture_index < XGU_TEXTURE_COUNT);
     return push_command_parameter(p, NV097_SET_TEXTURE_BORDER_COLOR + texture_index*64, color);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_texture_set_bump_env_mat(uint32_t* p, unsigned int texture_index, const float m[2*2]) {
     assert(texture_index < XGU_TEXTURE_COUNT);
     return push_command_matrix2x2(p, NV097_SET_TEXTURE_SET_BUMP_ENV_MAT + texture_index*64, m);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_texture_set_bump_env_scale(uint32_t* p, unsigned int texture_index, float scale) {
     assert(texture_index < XGU_TEXTURE_COUNT);
     return push_command_float(p, NV097_SET_TEXTURE_SET_BUMP_ENV_SCALE + texture_index*64, scale);
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_texture_set_bump_env_offset(uint32_t* p, unsigned int texture_index, float offset) {
     assert(texture_index < XGU_TEXTURE_COUNT);
     return push_command_float(p, NV097_SET_TEXTURE_SET_BUMP_ENV_OFFSET + texture_index*64, offset);
@@ -930,7 +1017,7 @@ uint32_t* xgu_set_texture_set_bump_env_offset(uint32_t* p, unsigned int texture_
 
 /* ==== Immediate Mode ==== */
 
-inline
+XGU_API
 uint32_t* xgu_vertex3f(uint32_t* p, float x, float y, float z) {
     p = push_command(p, NV097_SET_VERTEX3F, 3);
     p = push_float(p, x);
@@ -939,7 +1026,7 @@ uint32_t* xgu_vertex3f(uint32_t* p, float x, float y, float z) {
     return p;
 }
 
-inline
+XGU_API
 uint32_t* xgu_vertex4f(uint32_t* p, float x, float y, float z, float w) {
     p = push_command(p, NV097_SET_VERTEX4F, 4);
     p = push_float(p, x);
@@ -949,7 +1036,7 @@ uint32_t* xgu_vertex4f(uint32_t* p, float x, float y, float z, float w) {
     return p;
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_vertex_data2f(uint32_t* p, XguVertexArray index, float x, float y) {
     //FIXME: Why does this even have to exist? Can't we use parts of the 4F variant?
     p = push_command(p, NV097_SET_VERTEX_DATA2F_M + index * 2*4, 2);
@@ -958,7 +1045,7 @@ uint32_t* xgu_set_vertex_data2f(uint32_t* p, XguVertexArray index, float x, floa
     return p;
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_vertex_data4f(uint32_t* p, XguVertexArray index, float x, float y, float z, float w) {
     p = push_command(p, NV097_SET_VERTEX_DATA4F_M + index * 4*4, 4);
     p = push_float(p, x);
@@ -968,21 +1055,21 @@ uint32_t* xgu_set_vertex_data4f(uint32_t* p, XguVertexArray index, float x, floa
     return p;
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_vertex_data2s(uint32_t* p, XguVertexArray index, int16_t x, int16_t y) {
     p = push_command(p, NV097_SET_VERTEX_DATA2S + index * 1*4, 1);
     p = push_parameter(p, (uint16_t)y << 16 | (uint16_t)x);
     return p;
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_vertex_data4ub(uint32_t* p, XguVertexArray index, uint8_t x, uint8_t y, uint8_t z, uint8_t w) {
     p = push_command(p, NV097_SET_VERTEX_DATA4UB + index * 1*4, 1);
     p = push_parameter(p, w << 24 | z << 16 | y << 8 | x);
     return p;
 }
 
-inline
+XGU_API
 uint32_t* xgu_set_vertex_data4s(uint32_t* p, XguVertexArray index, int16_t x, int16_t y, int16_t z, int16_t w) {
     p = push_command(p, NV097_SET_VERTEX_DATA4S_M + index * 2*4, 2);
     p = push_parameter(p, (uint16_t)y << 16 | (uint16_t)x);
