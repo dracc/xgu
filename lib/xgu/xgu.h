@@ -691,6 +691,7 @@ uint32_t* xgu_set_transform_execution_mode(uint32_t* p, XguExecMode mode, XguExe
 
 XGU_API
 uint32_t* xgu_set_transform_constant(uint32_t* p, const XguVec4 *v, unsigned int count) {
+    assert(count <= 8);
     p = push_command(p, NV097_SET_TRANSFORM_CONSTANT, count*4);
     for (uint32_t i = 0; i < count; ++i) {
         p = push_floats(p, v[i].f, 4);
@@ -716,6 +717,7 @@ typedef union {
 
 XGU_API
 uint32_t* xgu_set_transform_program(uint32_t* p, const XguTransformProgramInstruction* instructions, unsigned int count) {
+    assert(count <= 8);
     p = push_command(p, NV097_SET_TRANSFORM_PROGRAM, count*4);
     for (uint32_t i = 0; i < count; ++i) {
         p = push_parameters(p, &instructions[i].i[0], 4);

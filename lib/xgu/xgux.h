@@ -89,12 +89,41 @@ void xgux_set_attrib_pointer(XguVertexArray index, XguVertexArrayType format, un
     pb_end(p);
 }
 
+XGUX_API
+void xgux_set_transform_program(int location, unsigned int count, const XguTransformProgramInstruction* instructions) {
+    uint32_t *p = pb_begin();
+    p = xgu_set_transform_program_load(p, location);
+    while(count > 0) {
+
+        /* Start next batch */
+        pb_end(p);
+        p = pb_begin();
+
+        unsigned int batch_count = MIN(count, 8);
+        p = xgu_set_transform_program(p, instructions, batch_count);
+
+        instructions += batch_count;
+        count -= batch_count;
+    }
+    pb_end(p);
+}
 
 XGUX_API
 void xgux_set_transform_constant_vec4(int location, unsigned int count, const XguVec4* v) {
     uint32_t *p = pb_begin();
     p = xgu_set_transform_constant_load(p, 96 + location);
-    p = xgu_set_transform_constant(p, v, count);
+    while(count > 0) {
+
+        /* Start next batch */
+        pb_end(p);
+        p = pb_begin();
+
+        unsigned int batch_count = MIN(count, 8);
+        p = xgu_set_transform_constant(p, v, batch_count);
+
+        v += batch_count;
+        count -= batch_count;
+    }
     pb_end(p);
 }
 
