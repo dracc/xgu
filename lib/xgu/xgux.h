@@ -12,7 +12,19 @@ XGUX_API
 void xgux_draw_arrays(XguPrimitiveType mode, unsigned int start, unsigned int count) {
     uint32_t *p = pb_begin();
     p = xgu_begin(p, mode);
-    p = xgu_draw_arrays(p, start, count);
+    while(count > 0) {
+
+        /* Start next batch */
+        pb_end(p);
+        p = pb_begin();
+
+        //FIXME: Maximum batch should be 256 elements maximum, will this work fine with all primitive types?
+        unsigned int batch_count = MIN(count, MAX_BATCH);
+        p = xgu_draw_arrays(p, start, batch_count);
+
+        start += batch_count;
+        count -= batch_count;
+    }
     p = xgu_end(p);
     pb_end(p);
 }
