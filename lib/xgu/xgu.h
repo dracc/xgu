@@ -690,6 +690,28 @@ uint32_t* xgu_set_front_face(uint32_t* p, XguFrontFace ff) {
     return push_command_parameter(p, NV097_SET_FRONT_FACE, ff);
 }
 
+typedef enum {
+    XGU_MATERIAL_SOURCE_DISABLE = 0, // FIXME: What does this even mean?
+    XGU_MATERIAL_SOURCE_VERTEX_DIFFUSE = 1,
+    XGU_MATERIAL_SOURCE_VERTEX_SPECULAR = 2
+} XguMaterialSource;
+
+#define NV097_SET_COLOR_MATERIAL   0x0298
+
+XGU_API
+uint32_t* xgu_set_color_material(uint32_t* p, XguMaterialSource emissive, XguMaterialSource ambient, XguMaterialSource diffuse, XguMaterialSource specular, XguMaterialSource back_emissive, XguMaterialSource back_ambient, XguMaterialSource back_diffuse, XguMaterialSource back_specular) {
+    uint32_t value = 0;
+    value |= (emissive      & 0x3) << 0;
+    value |= (ambient       & 0x3) << 2;
+    value |= (diffuse       & 0x3) << 4;
+    value |= (specular      & 0x3) << 6;
+    value |= (back_emissive & 0x3) << 8;
+    value |= (back_ambient  & 0x3) << 10;
+    value |= (back_diffuse  & 0x3) << 12;
+    value |= (back_specular & 0x3) << 14;
+    return push_command_parameter(p, NV097_SET_COLOR_MATERIAL, value);
+}
+
 /* ==== Transform ==== */
 XGU_API
 uint32_t* xgu_set_transform_execution_mode(uint32_t* p, XguExecMode mode, XguExecRange range) {
