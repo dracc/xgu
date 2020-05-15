@@ -676,6 +676,11 @@ uint32_t* xgu_set_front_polygon_mode(uint32_t* p, XguPolygonMode pm) {
 }
 
 XGU_API
+uint32_t* xgu_set_back_polygon_mode(uint32_t* p, XguPolygonMode pm) {
+    return push_command_parameter(p, NV097_SET_BACK_POLYGON_MODE, pm);
+}
+
+XGU_API
 uint32_t* xgu_set_cull_face(uint32_t* p, XguCullFace cf) {
     return push_command_parameter(p, NV097_SET_CULL_FACE, cf);
 }
