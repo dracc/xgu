@@ -661,6 +661,11 @@ uint32_t* xgu_set_depth_func(uint32_t* p, XguFuncType func) {
 }
 
 XGU_API
+uint32_t* xgu_set_depth_mask(uint32_t* p, bool mask) {
+    return push_command_parameter(p, NV097_SET_DEPTH_MASK, mask);
+}
+
+XGU_API
 uint32_t* xgu_set_color_mask(uint32_t* p, XguColorMask cm) {
     return push_command_parameter(p, NV097_SET_COLOR_MASK, cm);
 }
