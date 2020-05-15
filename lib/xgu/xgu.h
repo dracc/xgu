@@ -811,6 +811,62 @@ uint32_t* xgu_set_scene_ambient_color(uint32_t* p, float r, float g, float b) {
     return p;
 }
 
+//FIXME: Move to nv2a-regs.h
+#define NV097_SET_TWO_SIDE_LIGHT_EN               0x17C4
+#define NV097_SET_BACK_SCENE_AMBIENT_COLOR        0x17A0
+#define NV097_SET_BACK_MATERIAL_EMISSION          0x17B0
+#define NV097_SET_MATERIAL_EMISSION               0x03A8
+#define NV097_SET_MATERIAL_ALPHA                  0x03B4
+#define NV097_SET_BACK_MATERIAL_ALPHA             0x17AC
+#define NV097_SET_SPECULAR_ENABLE                 0x03B8
+
+XGU_API
+uint32_t* xgu_set_back_scene_ambient_color(uint32_t* p, float r, float g, float b) {
+    p = push_command(p, NV097_SET_BACK_SCENE_AMBIENT_COLOR, 3);
+    p = push_float(p, r);
+    p = push_float(p, g);
+    p = push_float(p, b);
+    return p;
+}
+
+XGU_API
+uint32_t* xgu_set_material_emission(uint32_t* p, float r, float g, float b) {
+    p = push_command(p, NV097_SET_MATERIAL_EMISSION, 3);
+    p = push_float(p, r);
+    p = push_float(p, g);
+    p = push_float(p, b);
+    return p;
+}
+
+XGU_API
+uint32_t* xgu_set_back_material_emission(uint32_t* p, float r, float g, float b) {
+    p = push_command(p, NV097_SET_BACK_MATERIAL_EMISSION, 3);
+    p = push_float(p, r);
+    p = push_float(p, g);
+    p = push_float(p, b);
+    return p;
+}
+
+XGU_API
+uint32_t* xgu_set_material_alpha(uint32_t* p, float a) {
+    return push_command_float(p, NV097_SET_MATERIAL_ALPHA, a);
+}
+
+XGU_API
+uint32_t* xgu_set_back_material_alpha(uint32_t* p, float a) {
+    return push_command_float(p, NV097_SET_BACK_MATERIAL_ALPHA, a);
+}
+
+XGU_API
+uint32_t* xgu_set_specular_enable(uint32_t* p, bool enabled) {
+    return push_command_boolean(p, NV097_SET_SPECULAR_ENABLE, enabled);
+}
+
+XGU_API
+uint32_t* xgu_set_two_side_light_enable(uint32_t* p, bool enabled) {
+    return push_command_boolean(p, NV097_SET_TWO_SIDE_LIGHT_EN, enabled);
+}
+
 XGU_API
 uint32_t* xgu_set_light_enable_mask(uint32_t* p, XguLightMask light0, XguLightMask light1, XguLightMask light2, XguLightMask light3, XguLightMask light4, XguLightMask light5,XguLightMask light6, XguLightMask light7) {
     return push_command_parameter(p, NV097_SET_LIGHT_ENABLE_MASK, 0
