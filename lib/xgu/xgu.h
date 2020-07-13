@@ -153,6 +153,23 @@ typedef enum {
 } XguTexgen;
 
 typedef enum {
+    XGU_FOGGEN_MODE_SPEC_ALPHA = NV097_SET_FOG_GEN_MODE_V_SPEC_ALPHA,
+    XGU_FOGGEN_MODE_RADIAL = NV097_SET_FOG_GEN_MODE_V_RADIAL,
+    XGU_FOGGEN_MODE_PLANAR = NV097_SET_FOG_GEN_MODE_V_PLANAR,
+    XGU_FOGGEN_MODE_ABS_PLANAR = NV097_SET_FOG_GEN_MODE_V_ABS_PLANAR,
+    XGU_FOGGEN_MODE_FOG_X = NV097_SET_FOG_GEN_MODE_V_FOG_X
+} XguFogGenMode;
+
+typedef enum {
+    XGU_FOG_MODE_LINEAR = NV097_SET_FOG_MODE_V_LINEAR,
+    XGU_FOG_MODE_EXP = NV097_SET_FOG_MODE_V_EXP,
+    XGU_FOG_MODE_EXP2 = NV097_SET_FOG_MODE_V_EXP2,
+    XGU_FOG_MODE_EXP_ABS = NV097_SET_FOG_MODE_V_EXP_ABS,
+    XGU_FOG_MODE_EXP2_ABS = NV097_SET_FOG_MODE_V_EXP2_ABS,
+    XGU_FOG_MODE_LINEAR_ABS = NV097_SET_FOG_MODE_V_LINEAR_ABS
+} XguFogMode;
+
+typedef enum {
     XGU_SOURCE_TEXTURE = NV097_SET_TEXTURE_FORMAT_BORDER_SOURCE_TEXTURE,
     XGU_SOURCE_COLOR = NV097_SET_TEXTURE_FORMAT_BORDER_SOURCE_COLOR
 } XguBorderSrc;
@@ -487,6 +504,35 @@ uint32_t* xgu_set_projection_matrix(uint32_t* p, const float m[4*4]) {
 XGU_API
 uint32_t* xgu_set_skin_mode(uint32_t* p, XguSkinMode skin_mode) {
     return push_command_parameter(p, NV097_SET_SKIN_MODE, skin_mode);
+}
+
+XGU_API
+uint32_t* xgu_set_fog_enable(uint32_t* p, bool enabled) {
+    return push_command_boolean(p, NV097_SET_FOG_ENABLE, enabled);
+}
+
+XGU_API
+uint32_t* xgu_set_fog_mode(uint32_t* p, XguFogMode fog_mode) {
+    return push_command_parameter(p, NV097_SET_FOG_MODE, fog_mode);
+}
+
+XGU_API
+uint32_t* xgu_set_fog_gen_mode(uint32_t* p, XguFogGenMode fog_gen_mode) {
+    return push_command_parameter(p, NV097_SET_FOG_GEN_MODE, fog_gen_mode);
+}
+
+XGU_API
+uint32_t* xgu_set_fog_color(uint32_t* p, uint32_t color) {
+    return push_command_parameter(p, NV097_SET_FOG_COLOR, color);
+}
+
+XGU_API
+uint32_t* xgu_set_fog_params(uint32_t* p, float near, float far, float density) {
+    p = push_command(p, NV097_SET_FOG_PARAMS, 3);
+    p = push_float(p, near);
+    p = push_float(p, far);
+    p = push_float(p, density);
+    return p;
 }
 
 XGU_API
