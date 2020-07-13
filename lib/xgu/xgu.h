@@ -527,12 +527,18 @@ uint32_t* xgu_set_fog_color(uint32_t* p, uint32_t color) {
 }
 
 XGU_API
-uint32_t* xgu_set_fog_params(uint32_t* p, float near, float far, float density) {
-    p = push_command(p, NV097_SET_FOG_PARAMS, 3);
-    p = push_float(p, near);
-    p = push_float(p, far);
-    p = push_float(p, density);
-    return p;
+uint32_t* xgu_set_fog_start(uint32_t* p, float start) {
+    return push_command_float(p, NV097_SET_FOG_PARAMS, start);
+}
+
+XGU_API
+uint32_t* xgu_set_fog_end(uint32_t* p, float end) {
+    return push_command_float(p, NV097_SET_FOG_PARAMS + 4, end);
+}
+
+XGU_API
+uint32_t* xgu_set_fog_density(uint32_t* p, float density) {
+    return push_command_float(p, NV097_SET_FOG_PARAMS + 8, density);
 }
 
 XGU_API
