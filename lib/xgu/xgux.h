@@ -431,6 +431,7 @@ static const float nv10_spot_params[2][16] = {
 	  3.10, 3.16, 3.23, 3.27, 3.37, 3.47, 3.83, 5.11 },
 };
 
+static
 void
 nv10_get_spot_coeff(float SpotExponent, float SpotCutoff, XguVec3 _NormSpotDirection, float k[7])
 {
