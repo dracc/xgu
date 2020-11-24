@@ -91,6 +91,20 @@ void xgux_set_clear_rect(unsigned int x, unsigned int y,
     pb_end(p);
 }
 
+#define NV097_SET_CONTROL0_TEXTUREPERSPECTIVE 0x100000
+
+XGUX_API
+void xgux_set_depth_range(float znear, float zfar) {
+    uint32_t *p = pb_begin();
+    uint32_t control0 = NV097_SET_CONTROL0_TEXTUREPERSPECTIVE | NV097_SET_CONTROL0_STENCIL_WRITE_ENABLE;
+    p = push_command_parameter(p, NV097_SET_CONTROL0, control0);
+    p = push_command_parameter(p, NV097_SET_ZMIN_MAX_CONTROL, 1);
+    p = push_command_parameter(p, NV097_SET_COMPRESS_ZBUFFER_EN, 1);
+    p = xgu_set_clip_min(p, znear);
+    p = xgu_set_clip_max(p, zfar);
+    pb_end(p);
+}
+
 XGUX_API
 void xgux_set_attrib_pointer(XguVertexArray index, XguVertexArrayType format, unsigned int size, unsigned int stride, const void* data) {
     uint32_t *p = pb_begin();
