@@ -91,8 +91,6 @@ void xgux_set_clear_rect(unsigned int x, unsigned int y,
     pb_end(p);
 }
 
-#define NV097_SET_CONTROL0_TEXTUREPERSPECTIVE 0x100000
-
 XGUX_API
 void xgux_set_depth_range(float znear, float zfar) {
     uint32_t *p = pb_begin();
