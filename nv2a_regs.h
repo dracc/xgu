@@ -803,9 +803,9 @@
 #   define NV097_SET_COMBINER_SPECULAR_FOG_CW1                0x0000028C
 #   define NV097_SET_CONTROL0                                 0x00000290
 #       define NV097_SET_CONTROL0_STENCIL_WRITE_ENABLE            (1 << 0)
-#       define NV097_SET_CONTROL0_TEXTUREPERSPECTIVE              (1 << 5)
 #       define NV097_SET_CONTROL0_Z_FORMAT                        (1 << 12)
 #       define NV097_SET_CONTROL0_Z_PERSPECTIVE_ENABLE            (1 << 16)
+#       define NV097_SET_CONTROL0_TEXTUREPERSPECTIVE              (1 << 20)
 #   define NV097_SET_FOG_MODE                                 0x0000029C
 #       define NV097_SET_FOG_MODE_V_LINEAR                        0x2601
 #       define NV097_SET_FOG_MODE_V_EXP                           0x800
