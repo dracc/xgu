@@ -256,6 +256,10 @@
 #   define NV_PGRAPH_INCREMENT_READ_3D                          (1 << 1)
 #define NV_PGRAPH_FIFO                                   0x00000720
 #   define NV_PGRAPH_FIFO_ACCESS                                (1 << 0)
+#define NV_PGRAPH_RDI_INDEX                              0x00000750
+#   define NV_PGRAPH_RDI_INDEX_ADDRESS                        0x00001FFC
+#   define NV_PGRAPH_RDI_INDEX_SELECT                         0x01FF0000
+#define NV_PGRAPH_RDI_DATA                               0x00000754
 #define NV_PGRAPH_CHANNEL_CTX_TABLE                      0x00000780
 #   define NV_PGRAPH_CHANNEL_CTX_TABLE_INST                   0x0000FFFF
 #define NV_PGRAPH_CHANNEL_CTX_POINTER                    0x00000784
@@ -296,6 +300,10 @@
 #       define NV_PGRAPH_CSV0_D_SKIN_4                              6
 #define NV_PGRAPH_CSV0_C                                 0x00000FB8
 #   define NV_PGRAPH_CSV0_C_CHEOPS_PROGRAM_START                0x0000FF00
+#   define NV_PGRAPH_CSV0_C_SPECULAR                            (3 << 19)
+#   define NV_PGRAPH_CSV0_C_DIFFUSE                             (3 << 21)
+#   define NV_PGRAPH_CSV0_C_AMBIENT                             (3 << 23)
+#   define NV_PGRAPH_CSV0_C_EMISSION                            (3 << 25)
 #   define NV_PGRAPH_CSV0_C_NORMALIZATION_ENABLE                (1 << 27)
 #   define NV_PGRAPH_CSV0_C_LIGHTING                            (1 << 31)
 #define NV_PGRAPH_CSV1_B                                 0x00000FBC
@@ -459,6 +467,8 @@
 #   define NV_PGRAPH_SETUPRASTER_POFFSETPOINTENABLE             (1 << 6)
 #   define NV_PGRAPH_SETUPRASTER_POFFSETLINEENABLE              (1 << 7)
 #   define NV_PGRAPH_SETUPRASTER_POFFSETFILLENABLE              (1 << 8)
+#   define NV_PGRAPH_SETUPRASTER_LINESMOOTHENABLE               (1 << 10)
+#   define NV_PGRAPH_SETUPRASTER_POLYSMOOTHENABLE               (1 << 11)
 #   define NV_PGRAPH_SETUPRASTER_CULLCTRL                       0x00600000
 #       define NV_PGRAPH_SETUPRASTER_CULLCTRL_FRONT                 1
 #       define NV_PGRAPH_SETUPRASTER_CULLCTRL_BACK                  2
@@ -507,6 +517,9 @@
 #define NV_PGRAPH_TEXCTL2_1                              0x000019F0
 #define NV_PGRAPH_TEXFILTER0                             0x000019F4
 #   define NV_PGRAPH_TEXFILTER0_MIPMAP_LOD_BIAS                 0x00001FFF
+#   define NV_PGRAPH_TEXFILTER0_CONVOLUTION_KERNEL              0x0000E000
+#       define NV_PGRAPH_TEXFILTER0_CONVOLUTION_KERNEL_QUINCUNX     1
+#       define NV_PGRAPH_TEXFILTER0_CONVOLUTION_KERNEL_GAUSSIAN_3   2
 #   define NV_PGRAPH_TEXFILTER0_MIN                             0x003F0000
 #       define NV_PGRAPH_TEXFILTER0_MIN_BOX_LOD0                    1
 #       define NV_PGRAPH_TEXFILTER0_MIN_TENT_LOD0                   2
@@ -595,6 +608,7 @@
 #   define NV_PCRTC_INTR_EN_0_VBLANK                            (1 << 0)
 #define NV_PCRTC_START                                   0x00000800
 #define NV_PCRTC_CONFIG                                  0x00000804
+#define NV_PCRTC_RASTER                                  0x00000808
 
 
 #define NV_PVIDEO_INTR                                   0x00000100
@@ -675,7 +689,14 @@
 #   define NV_PRAMDAC_PLL_TEST_COUNTER_MPLL_LOCK               (1 << 30)
 #   define NV_PRAMDAC_PLL_TEST_COUNTER_VPLL_LOCK               (1 << 31)
 #define NV_PRAMDAC_GENERAL_CONTROL                       0x00000600
-#   define NV_PRAMDAC_GENERAL_CONTROL_ALT_MODE                 (1 << 12)
+#   define NV_PRAMDAC_GENERAL_CONTROL_ALT_MODE_SEL             (1 << 12)
+#define NV_PRAMDAC_FP_VDISPLAY_END                       0x00000800
+#define NV_PRAMDAC_FP_VCRTC                              0x00000808
+#define NV_PRAMDAC_FP_VSYNC_END                          0x00000810
+#define NV_PRAMDAC_FP_VVALID_END                         0x00000818
+#define NV_PRAMDAC_FP_HDISPLAY_END                       0x00000820
+#define NV_PRAMDAC_FP_HCRTC                              0x00000828
+#define NV_PRAMDAC_FP_HVALID_END                         0x00000838
 
 #define NV_USER_DMA_PUT                                  0x40
 #define NV_USER_DMA_GET                                  0x44
@@ -806,6 +827,7 @@
 #       define NV097_SET_CONTROL0_Z_FORMAT                        (1 << 12)
 #       define NV097_SET_CONTROL0_Z_PERSPECTIVE_ENABLE            (1 << 16)
 #       define NV097_SET_CONTROL0_TEXTUREPERSPECTIVE              (1 << 20)
+#   define NV097_SET_COLOR_MATERIAL                           0x00000298
 #   define NV097_SET_FOG_MODE                                 0x0000029C
 #       define NV097_SET_FOG_MODE_V_LINEAR                        0x2601
 #       define NV097_SET_FOG_MODE_V_EXP                           0x800
@@ -836,6 +858,8 @@
 #   define NV097_SET_DEPTH_TEST_ENABLE                        0x0000030C
 #   define NV097_SET_DITHER_ENABLE                            0x00000310
 #   define NV097_SET_LIGHTING_ENABLE                          0x00000314
+#   define NV097_SET_LINE_SMOOTH_ENABLE                       0x00000320
+#   define NV097_SET_POLY_SMOOTH_ENABLE                       0x00000324
 #   define NV097_SET_SKIN_MODE                                0x00000328
 #       define NV097_SET_SKIN_MODE_OFF                            0
 #       define NV097_SET_SKIN_MODE_2G                             1
@@ -1079,6 +1103,7 @@
 #           define NV097_SET_TEXTURE_FORMAT_COLOR_SZ_R8B8           0x29
 # define NV097_SET_TEXTURE_FORMAT_COLOR_LU_IMAGE_DEPTH_X8_Y24_FIXED 0x2E
 #           define NV097_SET_TEXTURE_FORMAT_COLOR_LU_IMAGE_DEPTH_Y16_FIXED 0x30
+#           define NV097_SET_TEXTURE_FORMAT_COLOR_LU_IMAGE_DEPTH_Y16_FLOAT 0x31
 #           define NV097_SET_TEXTURE_FORMAT_COLOR_LU_IMAGE_Y16      0x35
 #           define NV097_SET_TEXTURE_FORMAT_COLOR_SZ_A8B8G8R8       0x3A
 #           define NV097_SET_TEXTURE_FORMAT_COLOR_SZ_R8G8B8A8       0x3C
@@ -1142,6 +1167,7 @@
 #   define NV097_SET_COMBINER_CONTROL                         0x00001E60
 #   define NV097_SET_SHADOW_ZSLOPE_THRESHOLD                  0x00001E68
 #   define NV097_SET_SHADER_STAGE_PROGRAM                     0x00001E70
+#   define NV097_SET_DOT_RGBMAPPING                           0X00001E74
 #   define NV097_SET_SHADER_OTHER_STAGE_INPUT                 0x00001E78
 #   define NV097_SET_TRANSFORM_EXECUTION_MODE                 0x00001E94
 #       define NV097_SET_TRANSFORM_EXECUTION_MODE_MODE            0x00000003
@@ -1296,6 +1322,14 @@
 #define NV_IGRAPH_XF_LTC1_L6                         0x12
 #define NV_IGRAPH_XF_LTC1_L7                         0x13
 
+/* These RDI select values appear to be named by MS.
+ * nvidia seems to refer to RDI_INDEX_VTX_CONSTANTS0 by RDI_RAMSEL_XL_XFCTX.
+ * However, we don't have other nvidia names; so we use these aliases for now.
+ * Eventually we'll probably adopt nouveau names for these internals.
+ */
+#define RDI_INDEX_VTX_CONSTANTS0                     0x17
+#define RDI_INDEX_VTX_CONSTANTS1                     0xCC
+
 
 #define NV2A_VERTEX_ATTR_POSITION       0
 #define NV2A_VERTEX_ATTR_WEIGHT         1
@@ -1330,5 +1364,7 @@
 #define NV2A_LTCTXA_COUNT  26
 #define NV2A_LTCTXB_COUNT  52
 #define NV2A_LTC1_COUNT    20
+
+#define NV2A_CUBEMAP_FACE_ALIGNMENT 128
 
 #endif
