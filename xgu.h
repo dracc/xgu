@@ -819,11 +819,6 @@ uint32_t* xgu_set_transform_program_cxt_write_enable(uint32_t* p, bool enabled) 
 }
 
 /* ==== Lights ==== */
-
-//FIXME: Move to nv2a_regs.h
-#define NV097_SET_SPECULAR_PARAMS      0x09E0
-#define NV097_SET_BACK_SPECULAR_PARAMS 0x1E28
-
 XGU_API
 uint32_t* xgu_set_specular(uint32_t* p, float a, float b, float c, float d, float e, float f) {
   p = push_command(p, NV097_SET_SPECULAR_PARAMS, 6);
@@ -856,15 +851,6 @@ uint32_t* xgu_set_scene_ambient_color(uint32_t* p, float r, float g, float b) {
     p = push_float(p, b);
     return p;
 }
-
-//FIXME: Move to nv2a-regs.h
-#define NV097_SET_TWO_SIDE_LIGHT_EN               0x17C4
-#define NV097_SET_BACK_SCENE_AMBIENT_COLOR        0x17A0
-#define NV097_SET_BACK_MATERIAL_EMISSION          0x17B0
-#define NV097_SET_MATERIAL_EMISSION               0x03A8
-#define NV097_SET_MATERIAL_ALPHA                  0x03B4
-#define NV097_SET_BACK_MATERIAL_ALPHA             0x17AC
-#define NV097_SET_SPECULAR_ENABLE                 0x03B8
 
 XGU_API
 uint32_t* xgu_set_back_scene_ambient_color(uint32_t* p, float r, float g, float b) {
